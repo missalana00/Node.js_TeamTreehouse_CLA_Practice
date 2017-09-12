@@ -24,28 +24,32 @@ function printMessage (username, badgeCount, points) {
 
 
 function getProfile(username) {
-// Connect to the API URL (http://teamtreehouse.com/username.json)
-const request = https.get(`https://teamtreehouse.com/${username}.json`, response => {
-//   console.log(response.statusCode);
-                      let body = "";
-                      // Read the data
-                      response.on('data', data => {
-                      body += data.toString();
-                      });
+    try {
+        // Connect to the API URL (https://teamtreehouse.com/username.json)
+        const request = https.get(`https://teamtreehouse.com/${username}.json`, response => {
+        // console.log(response.statusCode);
+                            let body = "";
+                            // Read the data
+                            response.on('data', data => {
+                              body += data.toString();
+                            });
   
-                      response.on('end', () => {
-                        // Parse the data        
-//                        console.log(body);
-//                        console.log(typeof body);         
-                         const profile = JSON.parse(body);
-//                         console.dir(profile);
-                         // Print the data
-                         printMessage(username, profile.badges.length, profile.points.JavaScript);
-                      });
+                            response.on('end', () => {
+                            // Parse the data        
+                            // console.log(body);
+                            //console.log(typeof body);         
+                                const profile = JSON.parse(body);
+                                // console.dir(profile);
+                                // Print the data
+                                printMessage(username, profile.badges.length, profile.points.JavaScript);
+                            });
   
-                      
-                      });
-};
+                          });
+            request.on('error', error => console.error(`Problem with request: ${error.message}`));                 
+          } catch(error) {
+            console.error(error.message);
+          }
+        };
 
 
 //getProfile("chalkers");
@@ -91,3 +95,11 @@ users.forEach(getProfile);
 // Process.argv Notes: Gives us the node binary, our app.js, and the users... we don't want the first 
 // two so we could use the slice method for a slice of the array starting at the index we want to start 
 // at which is the number 2 (the third member in the array) 
+// Now we are going to deal with the errors emitted by asynchronous calls 
+// Many asynchonous Node.js APIs give you an error event to listen to and if you don't 
+// implement the error callback, bad things can happen, for example, your application
+// could terminate unexpectedly 
+// It's always best to handle the error, even it's just to log it 
+// You can create an error state by changing the URL to https://wwww with no dot after it
+// and before the site name
+
