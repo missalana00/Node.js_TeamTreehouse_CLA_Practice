@@ -3,31 +3,39 @@
 
 // Must require https module
 const https = require('https');
-//const username = "chalkers";
+
+// const username = "chalkers";
+
+// Reuire http module for status codes
+const http = require('http');
 
 // Input will be our students' user names 
 // Output will be badge count and points
+// Steps will be:
+// 1.) Connect to the API URL (http://teamtreehouse.com/username.json)
+// 2.) Read the data
+// 3.) Parse the data
+// 4.) Print the data
 
-// Connect to the API URL (http://teamtreehouse.com/username.json)
-// Read the data
-// Parse the data
-// Print the data
+
+// Print error messages
+function printError(error) {
+    console.error(error.message);
+};
 
 // Function to print message to console
-
 function printMessage (username, badgeCount, points) {
   const message = `${username} has ${badgeCount} total badge(s) and ${points} points in JavaScript`;
   console.log(message);
-}
+};
 
-// printMessage("chalkers", 100, 2000000);
-
-
+// Function to getProfile information
 function getProfile(username) {
     try {
         // Connect to the API URL (https://teamtreehouse.com/username.json)
         const request = https.get(`https://teamtreehouse.com/${username}.json`, response => {
         // console.log(response.statusCode);
+                        if (response.statusCode === 200) {
                             let body = "";
                             // Read the data
                             response.on('data', data => {
@@ -35,21 +43,27 @@ function getProfile(username) {
                             });
   
                             response.on('end', () => {
+                                try {
                             // Parse the data        
-                            // console.log(body);
-                            //console.log(typeof body);         
                                 const profile = JSON.parse(body);
-                                // console.dir(profile);
-                                // Print the data
+                            // Print the data
                                 printMessage(username, profile.badges.length, profile.points.JavaScript);
+                                } catch (error) {
+                                    printError(error);
+                                };
                             });
-  
-                          });
-            request.on('error', error => console.error(`Problem with request: ${error.message}`));                 
-          } catch(error) {
-            console.error(error.message);
-          }
-        };
+                        } else {
+                            const message = `There was an error getting the profile for ${username} (${http.STATUS_CODES[response.statusCode]})`;
+                            const statusCodeError = new Error(message);
+                            printError(statusCodeError);
+                        };
+                    });
+
+        request.on('error', printError);                 
+        } catch(error) {
+            printError(error);
+          };
+};
 
 
 //getProfile("chalkers");
@@ -102,4 +116,9 @@ users.forEach(getProfile);
 // It's always best to handle the error, even it's just to log it 
 // You can create an error state by changing the URL to https://wwww with no dot after it
 // and before the site name
+// Handling Parsing Errors with Try and Catch: 
+// Handling Status code Errors : Handling http errors
+// Organzing Your Code with "require" : All of our code is in our app.js file 
+// and this isn't ideal. When our app grows it may be difficult to see what's
+// going on. We'll create our own module to compartmentalize our code.
 
